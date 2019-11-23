@@ -1,0 +1,227 @@
+{
+	"1": {
+		"owner": 2,
+		"users": {
+			"2": {
+				"status": 2
+			},
+			"48": {
+				"status": 0
+			},
+			"247": {
+				"status": 2
+			}
+		},
+		"number": 1,
+		"name": "DrAgOnS",
+		"balance": 13796470203,
+		"open": false,
+		"price": 500000000,
+		"people": 2,
+		"war": 1567756624834,
+		"invites": {
+			"79": {
+				"i": true
+			},
+			"262": {
+				"i": true
+			},
+			"594": {
+				"i": true
+			}
+		}
+	},
+	"3": {
+		"owner": 3,
+		"users": {
+			"3": {
+				"status": 2
+			}
+		},
+		"number": 3,
+		"name": "«Vlad_TOP»",
+		"balance": 142965,
+		"open": true,
+		"price": 500,
+		"people": 2,
+		"war": 1562266143463,
+		"invites": {}
+	},
+	"4": {
+		"owner": 264,
+		"users": {
+			"264": {
+				"status": 2
+			}
+		},
+		"number": 4,
+		"name": "Zona51",
+		"balance": 253359,
+		"open": true,
+		"price": 1000,
+		"people": 1,
+		"war": 1563475083892,
+		"invites": {}
+	},
+	"5": {
+		"owner": 558,
+		"users": {
+			"558": {
+				"status": 2
+			},
+			"560": {
+				"status": 0
+			},
+			"575": {
+				"status": 0
+			}
+		},
+		"number": 5,
+		"name": "рашен хулиганс",
+		"balance": 48793177,
+		"open": true,
+		"price": 100000000,
+		"people": 3,
+		"war": 1564377327804,
+		"invites": {}
+	},
+	"6": {
+		"owner": 591,
+		"users": {
+			"591": {
+				"status": 2
+			}
+		},
+		"number": 6,
+		"name": "𝕽𝖔𝖞𝖆𝖑𝖊𝕭𝖑𝖔𝖔𝖉",
+		"balance": 52266,
+		"open": true,
+		"price": 100,
+		"people": 1,
+		"war": 1563814143836,
+		"invites": {}
+	},
+	"7": {
+		"owner": 79,
+		"users": {
+			"79": {
+				"status": 2
+			}
+		},
+		"number": 7,
+		"name": "🌚АУЕ🌚",
+		"balance": 102959862,
+		"open": false,
+		"price": 100,
+		"people": 1,
+		"war": 1564335970903,
+		"invites": {}
+	},
+	"8": {
+		"owner": 181,
+		"users": {
+			"181": {
+				"status": 2
+			}
+		},
+		"number": 8,
+		"name": "MrFrankTeam",
+		"balance": 25439187007,
+		"open": true,
+		"price": 0,
+		"people": 1,
+		"war": 1563814150744,
+		"invites": {}
+	},
+	"9": {
+		"owner": 340,
+		"users": {
+			"242": {
+				"status": 0
+			},
+			"325": {
+				"status": 0
+			},
+			"330": {
+				"status": 0
+			},
+			"337": {
+				"status": 0
+			},
+			"339": {
+				"status": 0
+			},
+			"340": {
+				"status": 2
+			},
+			"350": {
+				"status": 0
+			},
+			"539": {
+				"status": 0
+			},
+			"607": {
+				"status": 0
+			},
+			"634": {
+				"status": 0
+			}
+		},
+		"number": 9,
+		"name": "Чьмо ❤️☺️",
+		"balance": 14955490942,
+		"open": true,
+		"price": 10000000000,
+		"people": 11,
+		"war": 1564335993826,
+		"invites": {}
+	},
+	"10": {
+		"owner": 76,
+		"users": {
+			"76": {
+				"status": 2
+			}
+		},
+		"number": 10,
+		"name": "💎из рая💎",
+		"balance": 93317,
+		"open": false,
+		"price": 100,
+		"people": 1,
+		"war": false,
+		"invites": {}
+	},
+	"11": {
+		"owner": 594,
+		"users": {
+			"594": {
+				"status": 2
+			}
+		},
+		"number": 11,
+		"name": "♥§Ω∞←↑↓→§Ω∞♥",
+		"balance": 10522,
+		"open": true,
+		"price": 3000000000000000,
+		"people": 1,
+		"war": false,
+		"invites": {}
+	},
+	"12": {
+		"owner": 858,
+		"users": {
+			"858": {
+				"status": 2
+			}
+		},
+		"number": 12,
+		"name": "SATANIC",
+		"balance": 96927,
+		"open": true,
+		"price": 100,
+		"people": 1,
+		"war": false,
+		"invites": {}
+	}
+}
