@@ -1,17 +1,23 @@
-/* 
-СОЗДАЛ ЭТУ ХУЙНЮ АРТЕМ БОЛЬШАКОВ - ОН ЖЕ ТУПОЕ КИДЛО И МУДАК - ССЫЛКА НА ЕГО ВК: https://vk.com/koderjs
-........
-Cлил эту хуйню - Я - https://vk.com/zeuvs
-*/
 const {VK, Keyboard} = require('vk-io');
 const request = require("prequest");
 const requests = require("request");
 const rq = require("prequest");
 const fs = require("fs");
 const vk = new VK();
-const {updates} = vk;
-const {snippets} = vk;
 const str = new VK();
+const ussr = new VK();
+const user = new VK();
+const {updates: cm} = vk;
+const {snippets} = vk;
+
+// Авторизация
+const gtoken = '' // токен группы
+const ut = '' // токен вашей страницы вк получать тут https://vkhost.github.io/ от приложения kate mobile
+const gid = ид группы 
+const qt = '' //qiwi токен для qiwi системы (по желанию)
+// Авторизация
+
+const child = require('child_process');
 const { createCanvas, loadImage} = require('canvas')
 const canvas = createCanvas(800, 800)
 const Canvas = require('canvas');
@@ -28,27 +34,22 @@ const tokens = require("./base/tokens.json");
 const saper = require("./base/saper.json");
 const tcpp = require('tcp-ping');
 vk.setOptions({
-	token: '840fd94880f733f84653c368ff45bd5b751e9e47e3a925838b0d0b22feb8dd7d88e959d5a1b2984d6ecf5', 
+	token: gtoken, 
 	apiMode: 'parallel',
-	pollingGroupId: 179084056 
+	pollingGroupId: gid
 });
-const child = require('child_process');
-var ussr = new VK();
 ussr.setOptions({
-	token: 'e4d55a083de04a95b9d4415e08fa54b07706977f5180c14b5870512d408f0769cad3fadd2c764f34cbf61'
+	token: ut
 });
-
-
-var user = new VK();
 user.setOptions({
-	token: 'e4d55a083de04a95b9d4415e08fa54b07706977f5180c14b5870512d408f0769cad3fadd2c764f34cbf61'
+	token: ut
 });
 // QIWI API
 var Qiwi = require('node-qiwi-api').Qiwi; 
-var Wallet = new Qiwi('d33599f8e5f28c5d8f8866eeec0b7b66') // Токен QIWI
+var Wallet = new Qiwi(qt) // Токен QIWI
 // QIWI API
-let giving = false; 
-const cm = vk.updates;
+
+let giving = false; ;
 const businesses = [[
 {name: 'Хлебная лавка', cost: 50000, earn: 200, workers: 1, id: 1, icon: '🥖'},
 {name: '5 Хлебных лавок', cost: 350000, earn: 1000, workers: 10, id: 1, icon: '🥖'},
@@ -235,7 +236,7 @@ cm.on(['chat_invite_user_by_link'], async (message, next) => {
 	message.send(`Добро пожаловать в беседу. Напиши команду "Помощь", что бы узнать мои команды`);
 	await next()
 });
-let stoken = 'e4d55a083de04a95b9d4415e08fa54b07706977f5180c14b5870512d408f0769cad3fadd2c764f34cbf61' // Токен вашей страницы
+let stoken = ut
 
 
 
@@ -458,13 +459,13 @@ cm.hear(/^(?:пинг|ping|ms|подключение|connect)\s?([^]+)?/i, (mess
 setInterval(() => {
 	var st = [`📝`,`✏`,`💭`].random();
 	var rt = [`${st} Принято более ${spaces(acc.msg)} сообщений!`,`👥 С нами уже ${spaces(acc.number)} игроков!`,].random();
-	user.api.status.set({text: rt, group_id: 179084056});
+	user.api.status.set({text: rt, group_id: gid});
 }, 120000);
 
 
 // Вечный онлайн сообщества
 setInterval(() => {
-	user.api.groups.enableOnline({group_id: 179084056})
+	user.api.groups.enableOnline({group_id: gid})
 }, 200000);
 
 
