@@ -1,9 +1,9 @@
-﻿/* 
+/* 
 СОЗДАЛ ЭТУ ХУЙНЮ АРТЕМ БОЛЬШАКОВ - ОН ЖЕ ТУПОЕ КИДЛО И МУДАК - ССЫЛКА НА ЕГО ВК: https://vk.com/koderjs
 ........
 Cлил эту хуйню - Я - https://vk.com/zeuvs
 */
-onst {VK, Keyboard} = require('vk-io');
+const {VK, Keyboard} = require('vk-io');
 const request = require("prequest");
 const requests = require("request");
 const rq = require("prequest");
